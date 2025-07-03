@@ -178,6 +178,13 @@ export const Hero: React.FC = () => {
           openDropdown === type
             ? "opacity-100 scale-y-100 translate-y-0"
             : "opacity-0 scale-y-95 translate-y-2 pointer-events-none"
+        } ${
+          // Mobile full width positioning
+          type === "destination" 
+            ? "left-0 right-0 md:left-auto md:right-auto md:w-auto w-full"
+            : type === "guests"
+            ? "right-0 md:w-80 w-full md:right-auto"
+            : ""
         }`}
         style={{ zIndex: 1000 }}
       >
@@ -189,7 +196,7 @@ export const Hero: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 max-w-7xl mx-auto">
       <div className="text-center mb-12 max-w-4xl">
-        <h1 className="text-xl md:text-3xl font-bold text-white mb-6 leading-tight font-[family-name:var(--font-cormorant-garamond)]">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 leading-tight font-[family-name:var(--font-cormorant-garamond)]">
           Your holiday deserves to be
           <span className="inline pl-2 bg-gradient-to-r text-brand antialiased">
             unforgettable
@@ -263,32 +270,36 @@ export const Hero: React.FC = () => {
                 openDropdown === "datePicker"
                   ? "opacity-100 scale-y-100 translate-y-0"
                   : "opacity-0 scale-y-95 translate-y-2 pointer-events-none"
-              }`}
-              style={{ zIndex: 1000, minWidth: "600px" }}
+              } w-full md:w-auto md:min-w-[600px]`}
+              style={{ zIndex: 1000 }}
             >
-              <div className="flex flex-col sm:flex-row overflow-hidden">
-                <div className="border-b sm:border-b-0 sm:border-r border-gray-200">
+              <div className="flex flex-col md:flex-row overflow-hidden">
+                <div className="border-b md:border-b-0 md:border-r border-gray-200 flex-1">
                   <div className="p-4 border-b border-gray-200">
                     <h4 className="font-semibold text-gray-900">Check-in</h4>
                   </div>
-                  <CalendarPicker
-                    selectedDate={checkInDate}
-                    onDateSelect={handleCheckInSelect}
-                    minDate={new Date()}
-                    maxDate={null}
-                  />
+                  <div className="flex justify-center">
+                    <CalendarPicker
+                      selectedDate={checkInDate}
+                      onDateSelect={handleCheckInSelect}
+                      minDate={new Date()}
+                      maxDate={null}
+                    />
+                  </div>
                 </div>
-                <div>
+                <div className="flex-1">
                   <div className="p-4 border-b border-gray-200">
                     <h4 className="font-semibold text-gray-900">Check-out</h4>
                   </div>
-                  <CalendarPicker
-                    selectedDate={checkOutDate}
-                    onDateSelect={setCheckOutDate}
-                    minDate={minCheckOutDate}
-                    maxDate={null}
-                    isCheckout={true}
-                  />
+                  <div className="flex justify-center">
+                    <CalendarPicker
+                      selectedDate={checkOutDate}
+                      onDateSelect={setCheckOutDate}
+                      minDate={minCheckOutDate}
+                      maxDate={null}
+                      isCheckout={true}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -300,7 +311,7 @@ export const Hero: React.FC = () => {
             label="Guests"
             value={guestText}
           >
-            <div className="right-0 w-80 p-4 space-y-4">
+            <div className="right-0 w-full md:w-80 p-4 space-y-4">
               {(
                 Object.entries(GUEST_LIMITS) as [
                   GuestType,

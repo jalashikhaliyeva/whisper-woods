@@ -8,6 +8,7 @@ export const VillasSlider: React.FC = () => {
   const [startPos, setStartPos] = useState(0);
   const [currentTranslate, setCurrentTranslate] = useState(0);
   const [prevTranslate, setPrevTranslate] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const villas = [
@@ -48,8 +49,23 @@ export const VillasSlider: React.FC = () => {
     },
   ];
 
-  const slideWidth = 680;
+  // Dynamic slide width based on screen size
+  const getSlideWidth = useCallback(() => {
+    return isMobile ? 300 : 680; // Mobile: 300px, Desktop: 680px
+  }, [isMobile]);
+
   const maxSlide = villas.length - 1;
+
+  // Check if mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const updateSlide = useCallback(
     (newSlide: number) => {
@@ -72,6 +88,7 @@ export const VillasSlider: React.FC = () => {
     (clientX: number) => {
       if (!isDragging) return;
 
+      const slideWidth = getSlideWidth();
       const diff = clientX - startPos;
       const newTranslate = prevTranslate + diff;
       const maxTranslate = 0;
@@ -86,7 +103,7 @@ export const VillasSlider: React.FC = () => {
         sliderRef.current.style.transform = `translateX(${clampedTranslate}px)`;
       }
     },
-    [isDragging, startPos, prevTranslate, maxSlide, slideWidth]
+    [isDragging, startPos, prevTranslate, maxSlide, getSlideWidth]
   );
 
   const handleEnd = useCallback(() => {
@@ -98,10 +115,13 @@ export const VillasSlider: React.FC = () => {
       sliderRef.current.style.cursor = "grab";
     }
 
+    const slideWidth = getSlideWidth();
     const movedBy = currentTranslate - prevTranslate;
-    if (movedBy < -100 && currentSlide < maxSlide) {
+    const threshold = isMobile ? 50 : 100; // Lower threshold for mobile
+
+    if (movedBy < -threshold && currentSlide < maxSlide) {
       updateSlide(currentSlide + 1);
-    } else if (movedBy > 100 && currentSlide > 0) {
+    } else if (movedBy > threshold && currentSlide > 0) {
       updateSlide(currentSlide - 1);
     } else {
       const newTranslate = -currentSlide * slideWidth;
@@ -114,8 +134,9 @@ export const VillasSlider: React.FC = () => {
     prevTranslate,
     currentSlide,
     maxSlide,
-    slideWidth,
+    getSlideWidth,
     updateSlide,
+    isMobile,
   ]);
 
   useEffect(() => {
@@ -139,13 +160,16 @@ export const VillasSlider: React.FC = () => {
 
     const handleTouchStart = (e: TouchEvent) =>
       handleStart(e.touches[0].clientX);
-    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // Prevent scrolling on mobile during swipe
+      handleMove(e.touches[0].clientX);
+    };
     const handleMouseDown = (e: MouseEvent) => handleStart(e.clientX);
     const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
 
     slider.addEventListener("wheel", handleWheel, { passive: false });
-    slider.addEventListener("touchstart", handleTouchStart);
-    slider.addEventListener("touchmove", handleTouchMove);
+    slider.addEventListener("touchstart", handleTouchStart, { passive: true });
+    slider.addEventListener("touchmove", handleTouchMove, { passive: false });
     slider.addEventListener("touchend", handleEnd);
     slider.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
@@ -164,13 +188,14 @@ export const VillasSlider: React.FC = () => {
   }, [currentSlide, handleStart, handleMove, handleEnd, updateSlide]);
 
   useEffect(() => {
+    const slideWidth = getSlideWidth();
     const newTranslate = -currentSlide * slideWidth;
     setCurrentTranslate(newTranslate);
     setPrevTranslate(newTranslate);
     if (sliderRef.current) {
       sliderRef.current.style.transform = `translateX(${newTranslate}px)`;
     }
-  }, [currentSlide, slideWidth]);
+  }, [currentSlide, getSlideWidth]);
 
   const NavButton = ({
     direction,
@@ -185,13 +210,15 @@ export const VillasSlider: React.FC = () => {
       onClick={onClick}
       className={`absolute ${
         direction === "left" ? "left-2" : "right-2"
-      } top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white flex items-center justify-center transition-all duration-300 ${
+      } top-1/2 -translate-y-1/2 ${
+        isMobile ? "w-10 h-10" : "w-12 h-12"
+      } rounded-full bg-white flex items-center justify-center transition-all duration-300 ${
         disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-50"
-      }`}
+      } shadow-md z-10`}
       disabled={disabled}
     >
       <svg
-        className="w-6 h-6 text-gray-600"
+        className={`${isMobile ? "w-5 h-5" : "w-6 h-6"} text-gray-600`}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -217,26 +244,34 @@ export const VillasSlider: React.FC = () => {
           {villas.map((villa) => (
             <div
               key={villa.id}
-              className="flex-shrink-0 mr-5 select-none"
-              style={{ width: "660px" }}
+              className={`flex-shrink-0 select-none ${
+                isMobile ? "mr-4" : "mr-5"
+              }`}
+              style={{ width: isMobile ? "280px" : "660px" }}
             >
               <div className="bg-white overflow-hidden transition-shadow duration-300 group">
-                <div className="relative h-[460px] overflow-hidden">
+                <div className={`relative overflow-hidden ${
+                  isMobile ? "h-[200px]" : "h-[460px]"
+                }`}>
                   <Image
                     src={villa.image}
                     alt={villa.title}
                     className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                     draggable={false}
-                    width={600}
-                    height={400}
+                    width={isMobile ? 280 : 600}
+                    height={isMobile ? 200 : 400}
                     quality={100}
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-2xl text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300">
+                <div className={`${isMobile ? "p-4" : "p-6"}`}>
+                  <h3 className={`text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300 ${
+                    isMobile ? "text-lg" : "text-2xl"
+                  }`}>
                     {villa.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed font-[family-name:var(--font-montserrat)]">
+                  <p className={`text-gray-600 leading-relaxed font-[family-name:var(--font-montserrat)] ${
+                    isMobile ? "text-sm" : "text-base"
+                  }`}>
                     {villa.description}
                   </p>
                 </div>
@@ -256,6 +291,8 @@ export const VillasSlider: React.FC = () => {
           onClick={() => updateSlide(currentSlide + 1)}
         />
       </div>
+
+    
     </div>
   );
 };

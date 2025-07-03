@@ -2,9 +2,6 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-
-
-
 const isBefore = (date1: Date, date2: Date): boolean => {
   return date1.getTime() < date2.getTime();
 };
@@ -28,7 +25,6 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onDateSelect,
   minDate,
   maxDate,
-
 }) => {
   const today = new Date();
   const currentMonth = selectedDate || today;
@@ -91,7 +87,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   };
 
   return (
-    <div className="w-72 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
+    <div className="w-full max-w-sm md:w-72 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => navigateMonth(-1)}
@@ -99,7 +95,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
         >
           <ChevronDown className="w-4 h-4 rotate-90" />
         </button>
-        <h3 className="font-semibold text-gray-900">
+        <h3 className="font-semibold text-gray-900 text-sm md:text-base">
           {displayMonth.toLocaleDateString("en-US", {
             month: "long",
             year: "numeric",
@@ -117,7 +113,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
           <div
             key={day}
-            className="p-2 text-xs font-medium text-gray-500 text-center"
+            className="p-1 md:p-2 text-xs font-medium text-gray-500 text-center"
           >
             {day}
           </div>
@@ -126,7 +122,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
       <div className="grid grid-cols-7 gap-1">
         {emptyDays.map((_, index) => (
-          <div key={`empty-${index}`} className="p-2"></div>
+          <div key={`empty-${index}`} className="p-1 md:p-2"></div>
         ))}
         {daysArray.map((day) => (
           <button
@@ -134,7 +130,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
             onClick={() => handleDateClick(day)}
             disabled={isDateDisabled(day)}
             className={`
-              p-2 text-sm rounded-lg transition-all duration-200 hover:bg-blue-50
+              p-1 md:p-2 text-sm rounded-lg transition-all duration-200 hover:bg-blue-50 min-h-[32px] md:min-h-[36px] flex items-center justify-center
               ${
                 isDateSelected(day)
                   ? "bg-brand text-white hover:bg-branddark"
