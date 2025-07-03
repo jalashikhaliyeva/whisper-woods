@@ -8,15 +8,15 @@ const Footer = () => {
       <Container>
         <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="pb-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {/* Newsletter Section */}
+      
             <div className="lg:col-span-1">
-              <h3 className="text-lg flex gap-2 items-center font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg flex gap-2 items-center font-normal text-gray-900 mb-6">
                 Join{" "}
                 <div className="flex items-center">
-                  <span className="font-semibold text-2xl mr-1 font-[family-name:var(--font-cormorant-garamond)] text-blackp">
+                  <span className="font-normal text-2xl mr-1 font-[family-name:var(--font-cormorant-garamond)] text-blackp">
                     Maison
                   </span>
-                  <span className="font-semibold text-2xl text-neutral-700 font-[family-name:var(--font-cormorant-garamond)]">
+                  <span className="font-normal text-2xl text-neutral-700 font-[family-name:var(--font-cormorant-garamond)]">
                     Lumière
                   </span>
                 </div>{" "}
@@ -25,15 +25,15 @@ const Footer = () => {
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
                   Subscribe to our newsletter to discover our travel
-                  inspirations. We have guides, our selection of the world&apos;s
-                  most beautiful homes and exclusive benefits.
+                  inspirations. We have guides, our selection of the
+                  world&apos;s most beautiful homes and exclusive benefits.
                 </p>
               </div>
             </div>
 
             {/* Destinations */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg font-normal text-gray-900 mb-6">
                 Destinations
               </h3>
               <ul className="space-y-4">
@@ -90,7 +90,7 @@ const Footer = () => {
 
             {/* Services */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg font-normal text-gray-900 mb-6">
                 Services
               </h3>
               <ul className="space-y-4">
@@ -147,7 +147,7 @@ const Footer = () => {
 
             {/* Contact */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg font-normal text-gray-900 mb-6">
                 Contact us
               </h3>
               <ul className="space-y-4">

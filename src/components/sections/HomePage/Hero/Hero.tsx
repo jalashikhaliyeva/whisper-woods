@@ -331,7 +331,7 @@ export const Hero: React.FC = () => {
             </div>
           </DropdownButton>
 
-          <button className="bg-gradient-to-r cursor-pointer from-brand to-branddark hover:from-branddark hover:to-brand text-white font-semibold py-4 px-6 rounded-xl md:rounded-none md:rounded-r-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl flex-shrink-0">
+          <button className="bg-gradient-to-r cursor-pointer from-brand to-branddark hover:from-branddark hover:to-brand text-white font-semibold py-4 px-6 rounded-b-xl md:rounded-none md:rounded-r-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl flex-shrink-0">
             <Search className="w-5 h-5" />
           </button>
         </div>
