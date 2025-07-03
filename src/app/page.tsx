@@ -5,6 +5,7 @@ import { HeroLayout } from "@/components/layout/HeroLayout";
 import { Banner } from "@/components/sections/HomePage/Banner/Banner";
 import { VillaExample } from "@/components/sections/HomePage/VillaExample";
 import { VillasSlider } from "@/components/sections/HomePage/VillasSlider/VillasSlider";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <VillaExample />
       <VillasSlider />
       {/* <Banner /> */}
+      <Footer />
     </>
   );
 }

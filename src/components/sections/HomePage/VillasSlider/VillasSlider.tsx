@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 export const VillasSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -48,138 +48,179 @@ export const VillasSlider: React.FC = () => {
     },
   ];
 
-  const slideWidth = 600; // 400px + 20px gap
+  const slideWidth = 680;
   const maxSlide = villas.length - 1;
+
+  const updateSlide = useCallback(
+    (newSlide: number) => {
+      const slide = Math.max(0, Math.min(maxSlide, newSlide));
+      setCurrentSlide(slide);
+    },
+    [maxSlide]
+  );
+
+  const handleStart = useCallback((clientX: number) => {
+    setIsDragging(true);
+    setStartPos(clientX);
+    if (sliderRef.current) {
+      sliderRef.current.style.transition = "none";
+      sliderRef.current.style.cursor = "grabbing";
+    }
+  }, []);
+
+  const handleMove = useCallback(
+    (clientX: number) => {
+      if (!isDragging) return;
+
+      const diff = clientX - startPos;
+      const newTranslate = prevTranslate + diff;
+      const maxTranslate = 0;
+      const minTranslate = -(maxSlide * slideWidth);
+      const clampedTranslate = Math.max(
+        minTranslate,
+        Math.min(maxTranslate, newTranslate)
+      );
+
+      setCurrentTranslate(clampedTranslate);
+      if (sliderRef.current) {
+        sliderRef.current.style.transform = `translateX(${clampedTranslate}px)`;
+      }
+    },
+    [isDragging, startPos, prevTranslate, maxSlide, slideWidth]
+  );
+
+  const handleEnd = useCallback(() => {
+    if (!isDragging) return;
+
+    setIsDragging(false);
+    if (sliderRef.current) {
+      sliderRef.current.style.transition = "transform 0.3s ease-out";
+      sliderRef.current.style.cursor = "grab";
+    }
+
+    const movedBy = currentTranslate - prevTranslate;
+    if (movedBy < -100 && currentSlide < maxSlide) {
+      updateSlide(currentSlide + 1);
+    } else if (movedBy > 100 && currentSlide > 0) {
+      updateSlide(currentSlide - 1);
+    } else {
+      const newTranslate = -currentSlide * slideWidth;
+      setCurrentTranslate(newTranslate);
+      setPrevTranslate(newTranslate);
+    }
+  }, [
+    isDragging,
+    currentTranslate,
+    prevTranslate,
+    currentSlide,
+    maxSlide,
+    slideWidth,
+    updateSlide,
+  ]);
 
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    const handleTouchStart = (e: TouchEvent) => {
-      setIsDragging(true);
-      setStartPos(e.touches[0].clientX);
-      slider.style.transition = "none";
-    };
+    let wheelTimeout: NodeJS.Timeout;
+    const handleWheel = (e: WheelEvent) => {
+      // Only prevent default if user is scrolling horizontally
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return;
-
-      const currentPosition = e.touches[0].clientX;
-      const diff = currentPosition - startPos;
-      setCurrentTranslate(prevTranslate + diff);
-
-      slider.style.transform = `translateX(${currentTranslate}px)`;
-    };
-
-    const handleTouchEnd = () => {
-      setIsDragging(false);
-      slider.style.transition = "transform 0.3s ease-out";
-
-      const movedBy = currentTranslate - prevTranslate;
-
-      if (movedBy < -100 && currentSlide < maxSlide) {
-        setCurrentSlide((prev) => prev + 1);
-      } else if (movedBy > 100 && currentSlide > 0) {
-        setCurrentSlide((prev) => prev - 1);
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+          if (e.deltaX > 30) updateSlide(currentSlide + 1);
+          else if (e.deltaX < -30) updateSlide(currentSlide - 1);
+        }, 50);
       }
-
-      setCurrentTranslate(-currentSlide * slideWidth);
-      setPrevTranslate(-currentSlide * slideWidth);
+      // Allow vertical scrolling to pass through
     };
 
-    // Mouse events for desktop
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsDragging(true);
-      setStartPos(e.clientX);
-      slider.style.transition = "none";
-      slider.style.cursor = "grabbing";
-    };
+    const handleTouchStart = (e: TouchEvent) =>
+      handleStart(e.touches[0].clientX);
+    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+    const handleMouseDown = (e: MouseEvent) => handleStart(e.clientX);
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-
-      const currentPosition = e.clientX;
-      const diff = currentPosition - startPos;
-      setCurrentTranslate(prevTranslate + diff);
-
-      slider.style.transform = `translateX(${currentTranslate}px)`;
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      slider.style.transition = "transform 0.3s ease-out";
-      slider.style.cursor = "grab";
-
-      const movedBy = currentTranslate - prevTranslate;
-
-      if (movedBy < -100 && currentSlide < maxSlide) {
-        setCurrentSlide((prev) => prev + 1);
-      } else if (movedBy > 100 && currentSlide > 0) {
-        setCurrentSlide((prev) => prev - 1);
-      }
-
-      setCurrentTranslate(-currentSlide * slideWidth);
-      setPrevTranslate(-currentSlide * slideWidth);
-    };
-
-    // Touch events
+    slider.addEventListener("wheel", handleWheel, { passive: false });
     slider.addEventListener("touchstart", handleTouchStart);
     slider.addEventListener("touchmove", handleTouchMove);
-    slider.addEventListener("touchend", handleTouchEnd);
-
-    // Mouse events
+    slider.addEventListener("touchend", handleEnd);
     slider.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseup", handleEnd);
 
     return () => {
+      clearTimeout(wheelTimeout);
+      slider.removeEventListener("wheel", handleWheel);
       slider.removeEventListener("touchstart", handleTouchStart);
       slider.removeEventListener("touchmove", handleTouchMove);
-      slider.removeEventListener("touchend", handleTouchEnd);
+      slider.removeEventListener("touchend", handleEnd);
       slider.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mouseup", handleEnd);
     };
-  }, [
-    isDragging,
-    startPos,
-    currentTranslate,
-    prevTranslate,
-    currentSlide,
-    maxSlide,
-  ]);
+  }, [currentSlide, handleStart, handleMove, handleEnd, updateSlide]);
 
   useEffect(() => {
     const newTranslate = -currentSlide * slideWidth;
     setCurrentTranslate(newTranslate);
     setPrevTranslate(newTranslate);
-
     if (sliderRef.current) {
       sliderRef.current.style.transform = `translateX(${newTranslate}px)`;
     }
-  }, [currentSlide]);
+  }, [currentSlide, slideWidth]);
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
+  const NavButton = ({
+    direction,
+    disabled,
+    onClick,
+  }: {
+    direction: "left" | "right";
+    disabled: boolean;
+    onClick: () => void;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`absolute ${
+        direction === "left" ? "left-2" : "right-2"
+      } top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white flex items-center justify-center transition-all duration-300 ${
+        disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-50"
+      }`}
+      disabled={disabled}
+    >
+      <svg
+        className="w-6 h-6 text-gray-600"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d={direction === "left" ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"}
+        />
+      </svg>
+    </button>
+  );
 
   return (
-    <div className="w-full mx-auto  py-8">
+    <div className="w-full mx-auto py-8">
       <div className="relative overflow-hidden">
-        {/* Slider Container */}
         <div
           ref={sliderRef}
           className="flex transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
           style={{ transform: `translateX(${currentTranslate}px)` }}
         >
-          {villas.map((villa, index) => (
+          {villas.map((villa) => (
             <div
               key={villa.id}
-              className="flex-shrink-0 w-96 mr-5 select-none"
+              className="flex-shrink-0 mr-5 select-none"
               style={{ width: "660px" }}
             >
-              <div className="bg-white  overflow-hidden  transition-shadow duration-300 group">
-                {/* Image Container */}
+              <div className="bg-white overflow-hidden transition-shadow duration-300 group">
                 <div className="relative h-[460px] overflow-hidden">
                   <Image
                     src={villa.image}
@@ -191,10 +232,8 @@ export const VillasSlider: React.FC = () => {
                     quality={100}
                   />
                 </div>
-
-                {/* Content */}
                 <div className="p-6">
-                  <h3 className="text-2xl  text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300">
+                  <h3 className="text-2xl text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300">
                     {villa.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed font-[family-name:var(--font-montserrat)]">
@@ -206,56 +245,16 @@ export const VillasSlider: React.FC = () => {
           ))}
         </div>
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={() => currentSlide > 0 && setCurrentSlide(currentSlide - 1)}
-          className={`absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white  flex items-center justify-center transition-all duration-300 ${
-            currentSlide === 0
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-blue-50 "
-          }`}
+        <NavButton
+          direction="left"
           disabled={currentSlide === 0}
-        >
-          <svg
-            className="w-6 h-6 text-gray-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-
-        <button
-          onClick={() =>
-            currentSlide < maxSlide && setCurrentSlide(currentSlide + 1)
-          }
-          className={`absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white flex items-center justify-center transition-all duration-300 ${
-            currentSlide === maxSlide
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-blue-50 "
-          }`}
+          onClick={() => updateSlide(currentSlide - 1)}
+        />
+        <NavButton
+          direction="right"
           disabled={currentSlide === maxSlide}
-        >
-          <svg
-            className="w-6 h-6 text-gray-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+          onClick={() => updateSlide(currentSlide + 1)}
+        />
       </div>
     </div>
   );
