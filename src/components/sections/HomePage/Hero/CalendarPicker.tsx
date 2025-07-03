@@ -1,0 +1,184 @@
+"use client";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+
+const format = (date: Date, formatStr: string): string => {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  if (formatStr === "MMM dd") {
+    return `${months[date.getMonth()]} ${date
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`;
+  }
+  return date.toLocaleDateString();
+};
+
+const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+const isBefore = (date1: Date, date2: Date): boolean => {
+  return date1.getTime() < date2.getTime();
+};
+
+const startOfDay = (date: Date): Date => {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+};
+
+interface CalendarPickerProps {
+  selectedDate: Date | null;
+  onDateSelect: (date: Date) => void;
+  minDate?: Date | null;
+  maxDate?: Date | null;
+  isCheckout?: boolean;
+}
+
+export const CalendarPicker: React.FC<CalendarPickerProps> = ({
+  selectedDate,
+  onDateSelect,
+  minDate,
+  maxDate,
+  isCheckout = false,
+}) => {
+  const today = new Date();
+  const currentMonth = selectedDate || today;
+  const [displayMonth, setDisplayMonth] = useState<Date>(currentMonth);
+
+  const daysInMonth = new Date(
+    displayMonth.getFullYear(),
+    displayMonth.getMonth() + 1,
+    0
+  ).getDate();
+  const firstDayOfMonth = new Date(
+    displayMonth.getFullYear(),
+    displayMonth.getMonth(),
+    1
+  ).getDay();
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: firstDayOfMonth }, (_, i) => null);
+
+  const isDateDisabled = (day: number): boolean => {
+    const date = new Date(
+      displayMonth.getFullYear(),
+      displayMonth.getMonth(),
+      day
+    );
+    const startOfDate = startOfDay(date);
+    const startOfMin = minDate ? startOfDay(minDate) : null;
+    const startOfMax = maxDate ? startOfDay(maxDate) : null;
+
+    if (startOfMin && isBefore(startOfDate, startOfMin)) return true;
+    if (startOfMax && isBefore(startOfMax, startOfDate)) return true;
+    return false;
+  };
+
+  const isDateSelected = (day: number): boolean => {
+    if (!selectedDate) return false;
+    const date = new Date(
+      displayMonth.getFullYear(),
+      displayMonth.getMonth(),
+      day
+    );
+    return selectedDate.toDateString() === date.toDateString();
+  };
+
+  const handleDateClick = (day: number): void => {
+    if (isDateDisabled(day)) return;
+    const date = new Date(
+      displayMonth.getFullYear(),
+      displayMonth.getMonth(),
+      day
+    );
+    onDateSelect(date);
+  };
+
+  const navigateMonth = (direction: number): void => {
+    setDisplayMonth((prev) => {
+      const newMonth = new Date(prev);
+      newMonth.setMonth(prev.getMonth() + direction);
+      return newMonth;
+    });
+  };
+
+  return (
+    <div className="w-72 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => navigateMonth(-1)}
+          className="p-1 hover:bg-gray-100 rounded transition-colors"
+        >
+          <ChevronDown className="w-4 h-4 rotate-90" />
+        </button>
+        <h3 className="font-semibold text-gray-900">
+          {displayMonth.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          })}
+        </h3>
+        <button
+          onClick={() => navigateMonth(1)}
+          className="p-1 hover:bg-gray-100 rounded transition-colors"
+        >
+          <ChevronDown className="w-4 h-4 -rotate-90" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+          <div
+            key={day}
+            className="p-2 text-xs font-medium text-gray-500 text-center"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {emptyDays.map((_, index) => (
+          <div key={`empty-${index}`} className="p-2"></div>
+        ))}
+        {daysArray.map((day) => (
+          <button
+            key={day}
+            onClick={() => handleDateClick(day)}
+            disabled={isDateDisabled(day)}
+            className={`
+              p-2 text-sm rounded-lg transition-all duration-200 hover:bg-blue-50
+              ${
+                isDateSelected(day)
+                  ? "bg-brand text-white hover:bg-branddark"
+                  : "hover:bg-gray-100"
+              }
+              ${
+                isDateDisabled(day)
+                  ? "text-gray-300 cursor-not-allowed hover:bg-transparent"
+                  : "text-gray-900 cursor-pointer"
+              }
+            `}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};

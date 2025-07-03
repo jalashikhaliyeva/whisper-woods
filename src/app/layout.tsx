@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import Container from "@/components/layout/Container";
+import { cormorantGaramond, montserrat } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Maison Lumière",
@@ -15,11 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <Container>
-          <Header />
-          {children}
-        </Container>
+      <body className={`${cormorantGaramond.variable} ${montserrat.variable}`}>
+        {children}
       </body>
     </html>
   );

@@ -10,18 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
-
-const cormorantGaramond = Cormorant_Garamond({
-  variable: "--font-cormorant-garamond",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-});
+import Container from "../Container";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,26 +23,28 @@ export function Header() {
   ];
 
   return (
+    <Container>
     <header
-      className={`flex items-center justify-between py-4 px-4 bg-background ${montserrat.variable}`}
+      className={`flex items-center justify-between py-4 px-4 bg-transparent`}
     >
+   
       {/* Logo */}
-      <div className={`flex items-center ${cormorantGaramond.variable}`}>
-        <span className="font-semibold text-2xl mr-1 font-[family-name:var(--font-cormorant-garamond)]">
+      <div className="flex items-center">
+        <span className="font-semibold text-2xl mr-1 font-[family-name:var(--font-cormorant-garamond)] text-white">
           Maison{" "}
         </span>
-        <span className="font-semibold text-2xl text-primary font-[family-name:var(--font-cormorant-garamond)]">
+        <span className="font-semibold text-2xl text-neutral-200 font-[family-name:var(--font-cormorant-garamond)]">
           Lumière
         </span>
       </div>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center space-x-6 text-muted-foreground font-[family-name:var(--font-montserrat)]">
+      <nav className="hidden md:flex items-center space-x-6 text-neutral-100 font-[family-name:var(--font-montserrat)]">
         {navLinks.map((link) => (
           <a
             key={link.name}
             href={link.href}
-            className="hover:text-foreground transition-colors "
+            className="hover:text-white transition-colors "
           >
             {link.name}
           </a>
@@ -62,29 +53,27 @@ export function Header() {
 
       {/* Right-aligned Icons */}
       <div className="flex items-center space-x-1">
-        <Button variant="ghost" size="icon" className="hidden md:inline-flex">
+        <Button variant="ghost" size="icon" className="hidden md:inline-flex text-blue-100 hover:text-white hover:bg-white/10">
           <Heart className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon" className="hidden md:inline-flex">
+        <Button variant="ghost" size="icon" className="hidden md:inline-flex text-blue-100 hover:text-white hover:bg-white/10">
           <User className="h-5 w-5" />
         </Button>
 
         {/* Mobile Menu Toggle */}
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-blue-100 hover:text-white hover:bg-white/10">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className={`w-full max-w-none px-6 ${montserrat.variable}`}
+            className="w-full max-w-none px-6"
           >
             <SheetHeader className="flex flex-row items-center justify-start mb-8">
               {/* Mobile Logo */}
-              <div
-                className={`flex items-center ${cormorantGaramond.variable}`}
-              >
+              <div className="flex items-center">
                 <span className="font-semibold text-2xl mr-1 font-[family-name:var(--font-cormorant-garamond)]">
                   Maison{" "}
                 </span>
@@ -94,7 +83,7 @@ export function Header() {
               </div>
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             </SheetHeader>
-            <nav className="flex flex-col items-center pt-20 space-y-6  font-[family-name:var(--font-montserrat)] h-full">
+            <nav className="flex flex-col items-center pt-20 space-y-6 font-[family-name:var(--font-montserrat)] h-full">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
@@ -122,5 +111,7 @@ export function Header() {
         </Sheet>
       </div>
     </header>
+    </Container>
+
   );
 }
