@@ -9,7 +9,7 @@ export const Banner: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col gap-4">
             <p className="text-brand font-[family-name:var(--font-cormorant-garamond)] text-6xl">
-              We're Villa{" "}
+              We&apos;re Villa{" "}
               <span className="text-branddark italic">Matchmakers</span>
             </p>
 

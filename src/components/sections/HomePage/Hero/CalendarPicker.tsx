@@ -3,35 +3,7 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 
-const format = (date: Date, formatStr: string): string => {
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  if (formatStr === "MMM dd") {
-    return `${months[date.getMonth()]} ${date
-      .getDate()
-      .toString()
-      .padStart(2, "0")}`;
-  }
-  return date.toLocaleDateString();
-};
 
-const addDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
 
 const isBefore = (date1: Date, date2: Date): boolean => {
   return date1.getTime() < date2.getTime();
@@ -56,7 +28,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onDateSelect,
   minDate,
   maxDate,
-  isCheckout = false,
+
 }) => {
   const today = new Date();
   const currentMonth = selectedDate || today;
@@ -73,7 +45,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     1
   ).getDay();
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const emptyDays = Array.from({ length: firstDayOfMonth }, (_, i) => null);
+  const emptyDays = Array.from({ length: firstDayOfMonth }, () => null);
 
   const isDateDisabled = (day: number): boolean => {
     const date = new Date(

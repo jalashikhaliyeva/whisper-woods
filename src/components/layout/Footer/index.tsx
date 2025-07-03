@@ -25,7 +25,7 @@ const Footer = () => {
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
                   Subscribe to our newsletter to discover our travel
-                  inspirations. We have guides, our selection of the world's
+                  inspirations. We have guides, our selection of the world&apos;s
                   most beautiful homes and exclusive benefits.
                 </p>
               </div>
@@ -249,7 +249,7 @@ const Footer = () => {
                 Terms of use
               </a>
               <a href="#" className="hover:text-gray-900 transition-colors">
-                T&C's
+                T&C&apos;s
               </a>
               <a href="#" className="hover:text-gray-900 transition-colors">
                 Sitemap

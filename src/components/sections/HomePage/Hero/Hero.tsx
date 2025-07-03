@@ -42,11 +42,15 @@ const addDays = (date: Date, days: number): Date => {
 
 const useDropdowns = () => {
   const [openDropdown, setOpenDropdown] = useState<DropdownType | null>(null);
-  const refs = {
-    destination: useRef<HTMLDivElement>(null),
-    datePicker: useRef<HTMLDivElement>(null),
-    guests: useRef<HTMLDivElement>(null),
-  };
+  const destinationRef = useRef<HTMLDivElement>(null);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const guestsRef = useRef<HTMLDivElement>(null);
+  
+  const refs = useMemo(() => ({
+    destination: destinationRef,
+    datePicker: datePickerRef,
+    guests: guestsRef,
+  }), []);
 
   const toggleDropdown = useCallback((type: DropdownType) => {
     setOpenDropdown((prev) => (prev === type ? null : type));
@@ -64,7 +68,7 @@ const useDropdowns = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [closeDropdowns]);
+  }, [closeDropdowns, refs]);
 
   return { openDropdown, toggleDropdown, closeDropdowns, refs };
 };
