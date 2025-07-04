@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import AdminLogin from '@/components/admin/AdminLogin';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminLogin from "@/components/admin/AdminLogin";
 
 export default function AdminLayout({
   children,
@@ -15,9 +15,8 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is authenticated
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken === 'admin-authenticated-2024') {
+    const adminToken = localStorage.getItem("adminToken");
+    if (adminToken === "admin-authenticated-2024") {
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
@@ -26,19 +25,21 @@ export default function AdminLayout({
   }, []);
 
   const handleLogin = (username: string, password: string) => {
-    // Static credentials
-    if (username === 'admin' && password === 'admin123') {
-      localStorage.setItem('adminToken', 'admin-authenticated-2024');
+    if (
+      username === process.env.ADMIN_USERNAME &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      localStorage.setItem("adminToken", "admin-authenticated-2024");
       setIsAuthenticated(true);
     } else {
-      alert('Invalid credentials');
+      alert("Invalid credentials");
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem("adminToken");
     setIsAuthenticated(false);
-    router.push('/admin');
+    router.push("/admin");
   };
 
   if (isLoading) {
@@ -57,10 +58,8 @@ export default function AdminLayout({
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         <AdminSidebar onLogout={handleLogout} />
-        <main className="flex-1 p-8">
-          {children}
-        </main>
+        <main className="flex-1 p-8">{children}</main>
       </div>
     </div>
   );
-} 
+}
