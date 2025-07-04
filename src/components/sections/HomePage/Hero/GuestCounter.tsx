@@ -1,15 +1,9 @@
 "use client"
 import React from 'react';
 import { Plus, Minus } from 'lucide-react';
+import { GuestCounterProps } from '@/types';
 
-interface GuestCounterProps {
-  label: string;
-  count: number;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  min?: number;
-  max?: number;
-}
+
 
 export const GuestCounter: React.FC<GuestCounterProps> = ({ 
   label, 

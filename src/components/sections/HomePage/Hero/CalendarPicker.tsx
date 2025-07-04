@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { CalendarPickerProps } from "@/types";
 
 const isBefore = (date1: Date, date2: Date): boolean => {
   return date1.getTime() < date2.getTime();
@@ -12,13 +13,6 @@ const startOfDay = (date: Date): Date => {
   return result;
 };
 
-interface CalendarPickerProps {
-  selectedDate: Date | null;
-  onDateSelect: (date: Date) => void;
-  minDate?: Date | null;
-  maxDate?: Date | null;
-  isCheckout?: boolean;
-}
 
 export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   selectedDate,
