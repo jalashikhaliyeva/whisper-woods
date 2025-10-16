@@ -5,6 +5,11 @@ import { cormorantGaramond, montserrat } from "@/lib/fonts";
 export const metadata: Metadata = {
   title: "Maison Lumière",
   description: "Maison Lumière",
+  icons: {
+    icon: '/favicon.webp', 
+    apple: '/favicon.webp',
+    shortcut: '/favicon.webp',
+  },
 };
 
 export default function RootLayout({
