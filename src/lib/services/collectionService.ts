@@ -10,7 +10,7 @@ export class CollectionService {
   // Category methods
   static async loadCategories(): Promise<CollectionCategory[]> {
     try {
-      const categories = await FirebaseStorageService.loadFiles<CollectionCategory & { url: string; fileName: string; fileSize: number; fileType: string }>(
+      const categories = await FirebaseStorageService.loadFiles<CollectionCategory>(
         this.CATEGORIES_DB_PATH
       );
       return categories
@@ -24,7 +24,7 @@ export class CollectionService {
 
   static async createCategory(name: string, slug: string, order: number): Promise<CollectionCategory> {
     try {
-      const newCategory: CollectionCategory & { url: string; fileName: string; fileSize: number; fileType: string } = {
+      const newCategory: CollectionCategory = {
         id: FirebaseStorageService.generateId(),
         name: name.trim(),
         slug: slug.trim().toLowerCase(),
@@ -66,7 +66,7 @@ export class CollectionService {
   // Collection Items methods
   static async loadCollectionItems(category?: string): Promise<CollectionItem[]> {
     try {
-      const items = await FirebaseStorageService.loadFiles<CollectionItem & { url: string; fileName: string; fileSize: number; fileType: string }>(
+      const items = await FirebaseStorageService.loadFiles<CollectionItem>(
         this.ITEMS_DB_PATH
       );
       
@@ -103,7 +103,7 @@ export class CollectionService {
 
       console.log("Upload successful, got download URL:", downloadURL);
 
-      const newItem: CollectionItem & { url: string; fileName: string; fileSize: number; fileType: string } = {
+      const newItem: CollectionItem = {
         id: FirebaseStorageService.generateId(),
         imageSrc: downloadURL,
         altText: title.trim(),
@@ -112,10 +112,10 @@ export class CollectionService {
         category: category.trim(),
         order: currentCount + 1,
         createdAt: new Date().toISOString(),
+        url: downloadURL,
         fileName: fileName || '',
         fileSize: file.size || 0,
         fileType: file.type || '',
-        url: downloadURL, // Required for FileMetadata
       };
 
       console.log("Saving to database...", newItem);

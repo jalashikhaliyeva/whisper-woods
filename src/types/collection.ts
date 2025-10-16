@@ -8,9 +8,11 @@ export interface CollectionItem {
     category: string;
     order: number;
     createdAt: string;
-    fileName?: string;
-    fileSize?: number;
-    fileType?: string;
+    url: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    [key: string]: unknown;
   }
   
   export interface CollectionCategory {
@@ -20,6 +22,11 @@ export interface CollectionItem {
     order: number;
     isActive: boolean;
     createdAt: string;
+    url: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    [key: string]: unknown;
   }
   
   export interface CollectionItemCardProps {

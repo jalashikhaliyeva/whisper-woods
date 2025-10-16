@@ -25,7 +25,7 @@ export interface FileMetadata {
   fileSize: number;
   fileType: string;
   createdAt: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface HeroImage extends FileMetadata {

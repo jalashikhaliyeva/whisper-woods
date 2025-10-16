@@ -152,6 +152,7 @@ export const useCollection = () => {
     if (selectedCategory && categories.length > 0) {
       loadItems();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
   return {

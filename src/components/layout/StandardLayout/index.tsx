@@ -2,7 +2,6 @@
 import { Header } from "@/components/layout/Header";
 import { StandardLayoutProps } from "@/types";
 // import { Footer } from "@/components/layout/Footer";
-import { ReactNode } from "react";
 
 
 export const StandardLayout = ({ 

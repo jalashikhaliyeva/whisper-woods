@@ -1,6 +1,7 @@
 "use client";
 // components/admin/CollectionAdmin.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { CollectionService } from "@/lib/services/collectionService";
 import { CollectionCategory, CollectionItem } from "@/types/collection";
 
@@ -24,17 +25,7 @@ export default function CollectionAdmin() {
   const [editLocation, setEditLocation] = useState("");
   const [editCategory, setEditCategory] = useState("");
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      loadItems();
-    }
-  }, [selectedCategory]);
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const loadedCategories = await CollectionService.loadCategories();
       setCategories(loadedCategories);
@@ -46,9 +37,9 @@ export default function CollectionAdmin() {
         err instanceof Error ? err.message : "Failed to load categories"
       );
     }
-  };
+  }, [selectedCategory]);
 
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     try {
       setLoading(true);
       const loadedItems = await CollectionService.loadCollectionItems(
@@ -60,7 +51,17 @@ export default function CollectionAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      loadItems();
+    }
+  }, [selectedCategory, loadItems]);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,11 +369,12 @@ export default function CollectionAdmin() {
                   key={item.id}
                   className="bg-white rounded-lg shadow-md overflow-hidden"
                 >
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
+                  <div className="aspect-w-16 aspect-h-9 relative w-full h-48">
+                    <Image
                       src={item.imageSrc}
                       alt={item.altText}
-                      className="w-full h-48 object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                   <div className="p-4">

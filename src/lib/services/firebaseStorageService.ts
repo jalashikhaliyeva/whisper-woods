@@ -5,7 +5,7 @@ import {
   deleteObject,
   listAll,
 } from "firebase/storage";
-import { ref as dbRef, set, get, remove, push } from "firebase/database";
+import { ref as dbRef, set, get, remove } from "firebase/database";
 import { storage, database } from "@/lib/firebase";
 import { FileMetadata } from "@/types";
 
@@ -17,8 +17,7 @@ export class FirebaseStorageService {
   // Upload file to Firebase Storage
   static async uploadFile(
     file: File,
-    path: string,
-    metadata?: Record<string, any>
+    path: string
   ): Promise<{ downloadURL: string; fileName: string }> {
     try {
       const timestamp = Date.now();

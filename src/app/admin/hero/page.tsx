@@ -1,6 +1,7 @@
 "use client";
 
 import { useHeroImages } from "@/lib/hooks/useHeroImages";
+import Image from "next/image";
 
 export default function HeroImagesPage() {
   const {
@@ -111,11 +112,12 @@ export default function HeroImagesPage() {
                   key={image.id}
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
                 >
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
+                  <div className="aspect-w-16 aspect-h-9 relative h-48">
+                    <Image
                       src={image.url}
                       alt={image.title}
-                      className="w-full h-48 object-cover"
+                      fill
+                      className="object-cover"
                       onError={(e) => {
                         console.error("Image failed to load:", image.url);
                         e.currentTarget.src = "/images/placeholder.jpg";
