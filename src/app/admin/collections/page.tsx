@@ -156,6 +156,7 @@ export default function CollectionAdmin() {
 
     try {
       setLoading(true);
+
       await CollectionService.updateCollectionItem(editingItem.id, {
         title: editTitle.trim(),
         location: editLocation.trim(),

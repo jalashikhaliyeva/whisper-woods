@@ -26,8 +26,8 @@ export default function AdminLayout({
 
   const handleLogin = (username: string, password: string) => {
     if (
-      username === process.env.ADMIN_USERNAME &&
-      password === process.env.ADMIN_PASSWORD
+      username === process.env.NEXT_PUBLIC_ADMIN_USERNAME &&
+      password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD
     ) {
       localStorage.setItem("adminToken", "admin-authenticated-2024");
       setIsAuthenticated(true);

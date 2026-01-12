@@ -5,11 +5,9 @@ import {
   deleteObject,
   listAll,
 } from "firebase/storage";
-import { ref as dbRef, set, get, remove } from "firebase/database";
+import { ref as dbRef, set, get, remove, update } from "firebase/database";
 import { storage, database } from "@/lib/firebase";
 import { FileMetadata } from "@/types";
-
-
 
 export class FirebaseStorageService {
   private static readonly STORAGE_PATH = "uploads";
@@ -59,9 +57,7 @@ export class FirebaseStorageService {
   }
 
   // Load files from Realtime Database
-  static async loadFiles<T extends FileMetadata>(
-    dbPath: string
-  ): Promise<T[]> {
+  static async loadFiles<T extends FileMetadata>(dbPath: string): Promise<T[]> {
     try {
       const dbReference = dbRef(database, dbPath);
       const snapshot = await get(dbReference);
@@ -73,7 +69,10 @@ export class FirebaseStorageService {
             id: key,
             ...data[key],
           }))
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
       }
       return [];
     } catch (error) {
@@ -124,7 +123,8 @@ export class FirebaseStorageService {
   ): Promise<void> {
     try {
       const dbReference = dbRef(database, `${dbPath}/${fileId}`);
-      await set(dbReference, updates);
+      // Use update() instead of set() to merge changes without overwriting existing data
+      await update(dbReference, updates);
     } catch (error) {
       console.error("Error updating file metadata:", error);
       throw new Error(
@@ -164,4 +164,4 @@ export class FirebaseStorageService {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
-} 
+}
