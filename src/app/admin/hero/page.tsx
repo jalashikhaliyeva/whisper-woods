@@ -34,7 +34,7 @@ export default function HeroImagesPage() {
   }
 
   return (
-    <div className="max-w-6xl">
+    <div>
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
           Hero Images

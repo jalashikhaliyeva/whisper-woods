@@ -54,7 +54,9 @@ export default function AdminLayout({
     <div className="min-h-screen bg-neutral-100">
       <div className="flex">
         <AdminSidebar onLogout={handleLogout} />
-        <main className="flex-1 p-8 overflow-auto">{children}</main>
+        <main className="flex-1 p-8 lg:p-12 overflow-auto">
+          <div className="max-w-6xl">{children}</div>
+        </main>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 export default function SettingsPage() {
   return (
-    <div className="max-w-4xl">
+    <div>
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
           Settings

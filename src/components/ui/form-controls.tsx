@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, ReactNode } from "react";
+import { ChangeEvent, ReactNode, useState, useRef, useEffect } from "react";
 
 // Form Field wrapper
 export const FormField = ({
@@ -44,7 +44,7 @@ export const Input = ({
   />
 );
 
-// Select dropdown
+// Native Select (for forms)
 type SelectOption = { value: string; label: string };
 export const Select = ({
   value,
@@ -59,23 +59,147 @@ export const Select = ({
   placeholder?: string;
   className?: string;
 }) => (
-  <select
-    value={value}
-    onChange={onChange}
-    className={`px-3 py-2.5 bg-white border border-neutral-200 text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors cursor-pointer ${className}`}
-  >
-    {placeholder && (
-      <option value="" className="text-neutral-400">
-        {placeholder}
-      </option>
-    )}
-    {options.map((opt) => (
-      <option key={opt.value} value={opt.value}>
-        {opt.label}
-      </option>
-    ))}
-  </select>
+  <div className={`relative ${className}`}>
+    <select
+      value={value}
+      onChange={onChange}
+      className="w-full appearance-none px-3 py-2.5 pr-10 bg-white border border-neutral-200 text-neutral-900 text-sm focus:outline-none focus:border-neutral-400 transition-colors cursor-pointer"
+    >
+      {placeholder && (
+        <option value="" className="text-neutral-400">
+          {placeholder}
+        </option>
+      )}
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+      <svg
+        className="w-4 h-4 text-neutral-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </div>
+  </div>
 );
+
+// Custom Dropdown (smooth animated)
+export const Dropdown = ({
+  value,
+  onChange,
+  options,
+  placeholder = "Select...",
+  className = "",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  className?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+  const displayValue = selectedOption?.label || placeholder;
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2.5 bg-white border text-sm transition-all duration-200 ${
+          isOpen
+            ? "border-neutral-400"
+            : "border-neutral-200 hover:border-neutral-300"
+        }`}
+      >
+        <span className={value ? "text-neutral-900" : "text-neutral-400"}>
+          {displayValue}
+        </span>
+        <svg
+          className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      <div
+        className={`absolute z-50 w-full mt-1 bg-white border border-neutral-200 shadow-lg transition-all duration-200 origin-top ${
+          isOpen
+            ? "opacity-100 scale-y-100 translate-y-0"
+            : "opacity-0 scale-y-95 -translate-y-1 pointer-events-none"
+        }`}
+      >
+        {placeholder && (
+          <button
+            type="button"
+            onClick={() => {
+              onChange("");
+              setIsOpen(false);
+            }}
+            className={`w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-neutral-50 ${
+              !value ? "text-neutral-900 bg-neutral-50" : "text-neutral-400"
+            }`}
+          >
+            {placeholder}
+          </button>
+        )}
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => {
+              onChange(opt.value);
+              setIsOpen(false);
+            }}
+            className={`w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-neutral-50 ${
+              value === opt.value
+                ? "text-neutral-900 bg-neutral-50"
+                : "text-neutral-600"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // Button variants
 const btnStyles = {

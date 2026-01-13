@@ -4,7 +4,7 @@ import { useCollectionAdmin } from "@/hooks/useCollectionAdmin";
 import {
   ErrorAlert,
   LoadingSpinner,
-  Select,
+  Dropdown,
 } from "@/components/ui/form-controls";
 import {
   AddCategoryForm,
@@ -42,7 +42,7 @@ export default function CollectionAdmin() {
   } = useCollectionAdmin();
 
   return (
-    <div className="max-w-6xl">
+    <div>
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
           Collections
@@ -119,14 +119,16 @@ export default function CollectionAdmin() {
       {activeTab === "manage" && (
         <div className="space-y-6">
           {/* Filter */}
-          <div className="flex items-center gap-4 p-4 bg-white border border-neutral-200">
-            <span className="text-sm text-neutral-600">Filter</span>
-            <Select
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-neutral-500 uppercase tracking-wide">
+              Filter by
+            </span>
+            <Dropdown
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={setSelectedCategory}
               options={categoryOptions}
               placeholder="All categories"
-              className="min-w-[200px]"
+              className="w-48"
             />
           </div>
 
