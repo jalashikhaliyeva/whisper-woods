@@ -115,6 +115,28 @@ export class FirebaseStorageService {
     }
   }
 
+  // Delete file from Storage only (without touching the database)
+  static async deleteStorageFile(fileUrl: string): Promise<void> {
+    try {
+      // Extract file path from URL
+      const url = new URL(fileUrl);
+      const filePath = decodeURIComponent(
+        url.pathname.split("/o/")[1].split("?")[0]
+      );
+
+      // Delete from Storage
+      const storageReference = ref(storage, filePath);
+      await deleteObject(storageReference);
+    } catch (error) {
+      console.error("Error deleting storage file:", error);
+      throw new Error(
+        `Error deleting storage file: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
   // Update file metadata in Database
   static async updateFileMetadata(
     dbPath: string,

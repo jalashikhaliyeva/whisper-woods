@@ -24,6 +24,8 @@ export default function CollectionAdmin() {
   const [editTitle, setEditTitle] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [editFile, setEditFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -142,6 +144,23 @@ export default function CollectionAdmin() {
     setEditTitle(item.title);
     setEditLocation(item.location);
     setEditCategory(item.category);
+    setEditFile(null);
+    setEditImagePreview(null);
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setEditFile(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEditImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setEditImagePreview(null);
+    }
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -157,17 +176,32 @@ export default function CollectionAdmin() {
     try {
       setLoading(true);
 
-      await CollectionService.updateCollectionItem(editingItem.id, {
-        title: editTitle.trim(),
-        location: editLocation.trim(),
-        category: editCategory,
-        altText: editTitle.trim(),
-      });
+      // Validate new file if one is selected
+      if (editFile) {
+        const validation = CollectionService.validateFile(editFile);
+        if (!validation.isValid) {
+          setError(validation.error || "Invalid file");
+          return;
+        }
+      }
+
+      await CollectionService.updateCollectionItemWithImage(
+        editingItem,
+        {
+          title: editTitle.trim(),
+          location: editLocation.trim(),
+          category: editCategory,
+          altText: editTitle.trim(),
+        },
+        editFile
+      );
 
       setEditingItem(null);
       setEditTitle("");
       setEditLocation("");
       setEditCategory("");
+      setEditFile(null);
+      setEditImagePreview(null);
       await loadItems();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update item");
@@ -181,6 +215,8 @@ export default function CollectionAdmin() {
     setEditTitle("");
     setEditLocation("");
     setEditCategory("");
+    setEditFile(null);
+    setEditImagePreview(null);
   };
 
   const getCategoryName = (slug: string) => {
@@ -381,6 +417,55 @@ export default function CollectionAdmin() {
                   <div className="p-4">
                     {editingItem?.id === item.id ? (
                       <form onSubmit={handleSaveEdit} className="space-y-3">
+                        {/* Image Preview and Change */}
+                        <div>
+                          <label className="block text-xs font-medium mb-1">
+                            Image
+                          </label>
+                          <div className="relative w-full h-24 mb-2 rounded overflow-hidden border border-gray-200">
+                            <Image
+                              src={editImagePreview || item.imageSrc}
+                              alt="Preview"
+                              fill
+                              className="object-cover"
+                            />
+                            {editImagePreview && (
+                              <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
+                                New
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <label className="flex-1 cursor-pointer">
+                              <span className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded text-sm border border-gray-300 transition-colors">
+                                {editFile ? "Change Image" : "Select New Image"}
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleEditFileChange}
+                                className="hidden"
+                              />
+                            </label>
+                            {editFile && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditFile(null);
+                                  setEditImagePreview(null);
+                                }}
+                                className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition-colors"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                          {editFile && (
+                            <p className="text-xs text-gray-500 mt-1 truncate">
+                              {editFile.name}
+                            </p>
+                          )}
+                        </div>
                         <div>
                           <label className="block text-xs font-medium mb-1">
                             Title
@@ -425,7 +510,7 @@ export default function CollectionAdmin() {
                             disabled={loading}
                             className="flex-1 bg-green-500 text-white p-2 rounded text-sm hover:bg-green-600 disabled:opacity-50"
                           >
-                            Save
+                            {loading ? "Saving..." : "Save"}
                           </button>
                           <button
                             type="button"
