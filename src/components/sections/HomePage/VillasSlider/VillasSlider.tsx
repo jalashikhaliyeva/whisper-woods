@@ -9,6 +9,7 @@ export const VillasSlider: React.FC = () => {
   const [currentTranslate, setCurrentTranslate] = useState(0);
   const [prevTranslate, setPrevTranslate] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const villas = [
@@ -54,17 +55,32 @@ export const VillasSlider: React.FC = () => {
     return isMobile ? 300 : 680; // Mobile: 300px, Desktop: 680px
   }, [isMobile]);
 
+  // Calculate the minimum translate value to prevent empty space
+  const getMinTranslate = useCallback(() => {
+    const slideWidth = getSlideWidth();
+    const margin = isMobile ? 16 : 20; // mr-4 = 16px, mr-5 = 20px
+    const totalContentWidth =
+      villas.length * slideWidth + (villas.length - 1) * margin;
+    const minTranslate = -(totalContentWidth - viewportWidth);
+
+    // Don't allow positive values (which would show empty space on the left)
+    return Math.min(0, minTranslate);
+  }, [isMobile, getSlideWidth, viewportWidth, villas.length]);
+
   const maxSlide = villas.length - 1;
 
   // Check if mobile on mount and window resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
+      if (sliderRef.current?.parentElement) {
+        setViewportWidth(sliderRef.current.parentElement.offsetWidth);
+      }
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const updateSlide = useCallback(
@@ -88,11 +104,10 @@ export const VillasSlider: React.FC = () => {
     (clientX: number) => {
       if (!isDragging) return;
 
-      const slideWidth = getSlideWidth();
       const diff = clientX - startPos;
       const newTranslate = prevTranslate + diff;
       const maxTranslate = 0;
-      const minTranslate = -(maxSlide * slideWidth);
+      const minTranslate = getMinTranslate();
       const clampedTranslate = Math.max(
         minTranslate,
         Math.min(maxTranslate, newTranslate)
@@ -103,7 +118,7 @@ export const VillasSlider: React.FC = () => {
         sliderRef.current.style.transform = `translateX(${clampedTranslate}px)`;
       }
     },
-    [isDragging, startPos, prevTranslate, maxSlide, getSlideWidth]
+    [isDragging, startPos, prevTranslate, getMinTranslate]
   );
 
   const handleEnd = useCallback(() => {
@@ -116,25 +131,33 @@ export const VillasSlider: React.FC = () => {
     }
 
     const slideWidth = getSlideWidth();
+    const minTranslate = getMinTranslate();
     const movedBy = currentTranslate - prevTranslate;
     const threshold = isMobile ? 50 : 100; // Lower threshold for mobile
 
-    if (movedBy < -threshold && currentSlide < maxSlide) {
+    // Check if we can move to next/previous slide
+    const canMoveNext = -((currentSlide + 1) * slideWidth) >= minTranslate;
+    const canMovePrev = currentSlide > 0;
+
+    if (movedBy < -threshold && canMoveNext) {
       updateSlide(currentSlide + 1);
-    } else if (movedBy > threshold && currentSlide > 0) {
+    } else if (movedBy > threshold && canMovePrev) {
       updateSlide(currentSlide - 1);
     } else {
-      const newTranslate = -currentSlide * slideWidth;
+      const newTranslate = Math.max(minTranslate, -currentSlide * slideWidth);
       setCurrentTranslate(newTranslate);
       setPrevTranslate(newTranslate);
+      if (sliderRef.current) {
+        sliderRef.current.style.transform = `translateX(${newTranslate}px)`;
+      }
     }
   }, [
     isDragging,
     currentTranslate,
     prevTranslate,
     currentSlide,
-    maxSlide,
     getSlideWidth,
+    getMinTranslate,
     updateSlide,
     isMobile,
   ]);
@@ -190,12 +213,17 @@ export const VillasSlider: React.FC = () => {
   useEffect(() => {
     const slideWidth = getSlideWidth();
     const newTranslate = -currentSlide * slideWidth;
-    setCurrentTranslate(newTranslate);
-    setPrevTranslate(newTranslate);
+    const minTranslate = getMinTranslate();
+
+    // Clamp the translate value to prevent empty space
+    const clampedTranslate = Math.max(minTranslate, newTranslate);
+
+    setCurrentTranslate(clampedTranslate);
+    setPrevTranslate(clampedTranslate);
     if (sliderRef.current) {
-      sliderRef.current.style.transform = `translateX(${newTranslate}px)`;
+      sliderRef.current.style.transform = `translateX(${clampedTranslate}px)`;
     }
-  }, [currentSlide, getSlideWidth]);
+  }, [currentSlide, getSlideWidth, getMinTranslate]);
 
   const NavButton = ({
     direction,
@@ -250,9 +278,11 @@ export const VillasSlider: React.FC = () => {
               style={{ width: isMobile ? "280px" : "660px" }}
             >
               <div className="bg-white overflow-hidden transition-shadow duration-300 group">
-                <div className={`relative overflow-hidden ${
-                  isMobile ? "h-[200px]" : "h-[460px]"
-                }`}>
+                <div
+                  className={`relative overflow-hidden ${
+                    isMobile ? "h-[200px]" : "h-[460px]"
+                  }`}
+                >
                   <Image
                     src={villa.image}
                     alt={villa.title}
@@ -264,14 +294,18 @@ export const VillasSlider: React.FC = () => {
                   />
                 </div>
                 <div className={`${isMobile ? "p-4" : "p-6"}`}>
-                  <h3 className={`text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300 ${
-                    isMobile ? "text-lg" : "text-2xl"
-                  }`}>
+                  <h3
+                    className={`text-brand mb-2 font-[family-name:var(--font-cormorant-garamond)] transition-colors duration-300 ${
+                      isMobile ? "text-lg" : "text-2xl"
+                    }`}
+                  >
                     {villa.title}
                   </h3>
-                  <p className={`text-gray-600 leading-relaxed font-[family-name:var(--font-montserrat)] ${
-                    isMobile ? "text-sm" : "text-base"
-                  }`}>
+                  <p
+                    className={`text-gray-600 leading-relaxed font-[family-name:var(--font-montserrat)] ${
+                      isMobile ? "text-sm" : "text-base"
+                    }`}
+                  >
                     {villa.description}
                   </p>
                 </div>
@@ -287,12 +321,10 @@ export const VillasSlider: React.FC = () => {
         />
         <NavButton
           direction="right"
-          disabled={currentSlide === maxSlide}
+          disabled={currentTranslate <= getMinTranslate()}
           onClick={() => updateSlide(currentSlide + 1)}
         />
       </div>
-
-    
     </div>
   );
 };
