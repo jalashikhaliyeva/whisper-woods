@@ -2,6 +2,14 @@
 
 import { useHeroImages } from "@/lib/hooks/useHeroImages";
 import Image from "next/image";
+import {
+  FormField,
+  Input,
+  AdminButton,
+  FileInput,
+  LoadingSpinner,
+  ErrorAlert,
+} from "@/components/ui/form-controls";
 
 export default function HeroImagesPage() {
   const {
@@ -22,163 +30,144 @@ export default function HeroImagesPage() {
   } = useHeroImages();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Hero Images Management
+    <div className="max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
+          Hero Images
         </h1>
+        <p className="text-neutral-500 text-sm mt-1">
+          Manage homepage hero section images
+        </p>
+      </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex">
-              <div className="text-red-700">
-                <strong>Error:</strong> {error}
+      {error && (
+        <ErrorAlert message={error} onClose={() => window.location.reload()} />
+      )}
+
+      {/* Upload Section */}
+      <div className="p-6 bg-white border border-neutral-200 mb-8">
+        <h2 className="font-medium text-neutral-900 mb-6">Upload New Image</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField label="Image File">
+            <FileInput onChange={handleFileSelect} />
+            {selectedFile && (
+              <p className="mt-2 text-xs text-neutral-500">
+                {selectedFile.name} (
+                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              </p>
+            )}
+          </FormField>
+          <FormField label="Image Title">
+            <Input
+              value={imageTitle}
+              onChange={(e) => setImageTitle(e.target.value)}
+              placeholder="Enter image title"
+            />
+          </FormField>
+        </div>
+        <div className="mt-6">
+          <AdminButton
+            onClick={uploadImage}
+            disabled={isUploading || !selectedFile || !imageTitle.trim()}
+          >
+            {isUploading ? "Uploading..." : "Upload Image"}
+          </AdminButton>
+        </div>
+      </div>
+
+      {/* Images Grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-medium text-neutral-900">
+            Current Images
+            <span className="ml-2 text-neutral-400 font-normal">
+              ({images.length})
+            </span>
+          </h2>
+        </div>
+
+        {images.length === 0 ? (
+          <div className="py-16 text-center text-neutral-400 text-sm border border-dashed border-neutral-200">
+            No hero images uploaded yet
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {images.map((image) => (
+              <div
+                key={image.id}
+                className="bg-white border border-neutral-200 overflow-hidden"
+              >
+                <div className="relative aspect-video">
+                  <Image
+                    src={image.url}
+                    alt={image.title}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/placeholder.jpg";
+                    }}
+                  />
+                </div>
+
+                <div className="p-4">
+                  {editingImage?.id === image.id ? (
+                    <div className="space-y-3">
+                      <Input
+                        value={imageTitle}
+                        onChange={(e) => setImageTitle(e.target.value)}
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <AdminButton
+                          onClick={updateImage}
+                          className="flex-1 text-sm py-2"
+                        >
+                          Save
+                        </AdminButton>
+                        <AdminButton
+                          onClick={cancelEditing}
+                          variant="secondary"
+                          className="flex-1 text-sm py-2"
+                        >
+                          Cancel
+                        </AdminButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="font-medium text-neutral-900">
+                        {image.title}
+                      </h3>
+                      <p className="text-xs text-neutral-400 mt-1">
+                        Order: {image.order}
+                      </p>
+                      <div className="flex gap-2 mt-4 pt-4 border-t border-neutral-100">
+                        <AdminButton
+                          onClick={() => startEditing(image)}
+                          variant="secondary"
+                          className="flex-1 text-sm py-2"
+                        >
+                          Edit
+                        </AdminButton>
+                        <AdminButton
+                          onClick={() => deleteImage(image)}
+                          variant="danger"
+                          className="flex-1 text-sm py-2"
+                        >
+                          Delete
+                        </AdminButton>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
-
-        {/* Upload Section */}
-        <div className="bg-gray-50 p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Upload New Image
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image File (Max 5MB)
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              {selectedFile && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: {selectedFile.name} (
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image Title
-              </label>
-              <input
-                type="text"
-                value={imageTitle}
-                onChange={(e) => setImageTitle(e.target.value)}
-                placeholder="Enter image title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <button
-              onClick={uploadImage}
-              disabled={isUploading || !selectedFile || !imageTitle.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUploading ? "Uploading..." : "Upload Image"}
-            </button>
-          </div>
-        </div>
-
-        {/* Images Grid */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Current Hero Images ({images.length})
-          </h2>
-
-          {images.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              No hero images uploaded yet.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {images.map((image) => (
-                <div
-                  key={image.id}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
-                >
-                  <div className="aspect-w-16 aspect-h-9 relative h-48">
-                    <Image
-                      src={image.url}
-                      alt={image.title}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        console.error("Image failed to load:", image.url);
-                        e.currentTarget.src = "/images/placeholder.jpg";
-                      }}
-                    />
-                  </div>
-
-                  <div className="p-4">
-                    {editingImage?.id === image.id ? (
-                      <div className="space-y-2">
-                        <input
-                          type="text"
-                          value={imageTitle}
-                          onChange={(e) => setImageTitle(e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                        />
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={updateImage}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <h3 className="font-medium text-gray-900 mb-2">
-                          {image.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-3">
-                          Order: {image.order}
-                        </p>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => startEditing(image)}
-                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => deleteImage(image)}
-                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

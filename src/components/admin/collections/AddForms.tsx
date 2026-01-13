@@ -5,6 +5,7 @@ import {
   Input,
   Select,
   AdminButton,
+  FileInput,
 } from "@/components/ui/form-controls";
 
 type CategoryOption = { value: string; label: string };
@@ -22,14 +23,14 @@ export const AddCategoryForm = ({
   onSubmit,
   loading,
 }: AddCategoryFormProps) => (
-  <div className="bg-white p-6 rounded-lg shadow-md">
-    <h2 className="text-xl font-semibold mb-4">Add New Category</h2>
-    <form onSubmit={onSubmit} className="space-y-4">
+  <div className="p-6 bg-white border border-neutral-200">
+    <h2 className="font-medium text-neutral-900 mb-6">New Category</h2>
+    <form onSubmit={onSubmit} className="space-y-5">
       <FormField label="Category Name">
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="e.g., Spring Collection"
+          placeholder="Enter category name"
         />
       </FormField>
       <AdminButton
@@ -70,15 +71,15 @@ export const AddItemForm = ({
   loading,
   canSubmit,
 }: AddItemFormProps) => (
-  <div className="bg-white p-6 rounded-lg shadow-md">
-    <h2 className="text-xl font-semibold mb-4">Add New Item</h2>
-    <form onSubmit={onSubmit} className="space-y-4">
+  <div className="p-6 bg-white border border-neutral-200">
+    <h2 className="font-medium text-neutral-900 mb-6">New Item</h2>
+    <form onSubmit={onSubmit} className="space-y-5">
       <FormField label="Category">
         <Select
           value={selectedCategory}
           onChange={(e) => onCategoryChange(e.target.value)}
           options={categoryOptions}
-          placeholder="Select Category"
+          placeholder="Select category"
           className="w-full"
         />
       </FormField>
@@ -86,27 +87,21 @@ export const AddItemForm = ({
         <Input
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="e.g., Villa Monastero"
+          placeholder="Enter title"
         />
       </FormField>
       <FormField label="Location">
         <Input
           value={location}
           onChange={(e) => onLocationChange(e.target.value)}
-          placeholder="e.g., Lake Como, Italy"
+          placeholder="Enter location"
         />
       </FormField>
       <FormField label="Image">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={onFileChange}
-          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-        />
+        <FileInput onChange={onFileChange} />
       </FormField>
       <AdminButton
         type="submit"
-        variant="green"
         disabled={loading || !canSubmit}
         className="w-full"
       >

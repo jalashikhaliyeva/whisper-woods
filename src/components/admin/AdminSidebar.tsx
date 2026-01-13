@@ -1,58 +1,55 @@
-'use client';
+"use client";
 
-import { AdminSidebarProps } from '@/types';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { AdminSidebarProps } from "@/types";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-
+const navigation = [
+  { name: "Dashboard", href: "/admin" },
+  { name: "Hero Images", href: "/admin/hero" },
+  { name: "Collections", href: "/admin/collections" },
+  { name: "Settings", href: "/admin/settings" },
+];
 
 export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
   const pathname = usePathname();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: '📊' },
-    { name: 'Hero Images', href: '/admin/hero', icon: '🖼️' },
-    { name: 'Collections', href: '/admin/collections', icon: '📁' },
-    { name: 'Settings', href: '/admin/settings', icon: '⚙️' },
-  ];
-
   return (
-    <div className="w-64 bg-white shadow-lg min-h-screen">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          Admin Panel
-        </h1>
-        
-        <nav className="space-y-2">
+    <aside className="w-60 min-h-screen bg-neutral-950 text-white flex flex-col">
+      <div className="px-6 py-8">
+        <h1 className="text-lg font-semibold tracking-tight">Whisper Woods</h1>
+        <p className="text-xs text-neutral-500 mt-0.5">Admin Panel</p>
+      </div>
+
+      <nav className="flex-1 px-3">
+        <div className="space-y-0.5">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                className={`flex items-center px-3 py-2.5 text-sm transition-colors ${
                   isActive
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? "bg-white/10 text-white"
+                    : "text-neutral-400 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <span className="mr-3 text-lg">{item.icon}</span>
                 {item.name}
               </Link>
             );
           })}
-        </nav>
-        
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <button
-            onClick={onLogout}
-            className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <span className="mr-3">🚪</span>
-            Logout
-          </button>
         </div>
+      </nav>
+
+      <div className="px-3 py-6 border-t border-white/10">
+        <button
+          onClick={onLogout}
+          className="flex items-center w-full px-3 py-2.5 text-sm text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+        >
+          Sign out
+        </button>
       </div>
-    </div>
+    </aside>
   );
-} 
+}

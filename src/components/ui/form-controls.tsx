@@ -11,10 +11,10 @@ export const FormField = ({
   children: ReactNode;
   small?: boolean;
 }) => (
-  <div>
+  <div className="space-y-1.5">
     <label
-      className={`block font-medium mb-${small ? "1" : "2"} ${
-        small ? "text-xs" : "text-sm"
+      className={`block text-neutral-600 tracking-wide ${
+        small ? "text-xs" : "text-xs uppercase"
       }`}
     >
       {label}
@@ -40,7 +40,7 @@ export const Input = ({
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+    className={`w-full px-3 py-2.5 bg-white border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors ${className}`}
   />
 );
 
@@ -62,9 +62,13 @@ export const Select = ({
   <select
     value={value}
     onChange={onChange}
-    className={`p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+    className={`px-3 py-2.5 bg-white border border-neutral-200 text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors cursor-pointer ${className}`}
   >
-    {placeholder && <option value="">{placeholder}</option>}
+    {placeholder && (
+      <option value="" className="text-neutral-400">
+        {placeholder}
+      </option>
+    )}
     {options.map((opt) => (
       <option key={opt.value} value={opt.value}>
         {opt.label}
@@ -73,25 +77,27 @@ export const Select = ({
   </select>
 );
 
-// Admin Button with color variants
-const btnColors = {
-  blue: "bg-blue-500 hover:bg-blue-600",
-  green: "bg-green-500 hover:bg-green-600",
-  red: "bg-red-500 hover:bg-red-600",
-  gray: "bg-gray-500 hover:bg-gray-600",
+// Button variants
+const btnStyles = {
+  primary: "bg-neutral-900 text-white hover:bg-neutral-800",
+  secondary:
+    "bg-white text-neutral-900 border border-neutral-200 hover:bg-neutral-50",
+  danger:
+    "bg-white text-red-600 border border-neutral-200 hover:bg-red-50 hover:border-red-200",
+  ghost: "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100",
 };
 
 export const AdminButton = ({
   onClick,
   disabled,
-  variant = "blue",
+  variant = "primary",
   className = "",
   children,
   type = "button",
 }: {
   onClick?: () => void;
   disabled?: boolean;
-  variant?: keyof typeof btnColors;
+  variant?: keyof typeof btnStyles;
   className?: string;
   children: ReactNode;
   type?: "button" | "submit";
@@ -100,7 +106,7 @@ export const AdminButton = ({
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`text-white p-2 rounded disabled:opacity-50 disabled:cursor-not-allowed ${btnColors[variant]} ${className}`}
+    className={`px-4 py-2.5 text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${btnStyles[variant]} ${className}`}
   >
     {children}
   </button>
@@ -114,18 +120,64 @@ export const ErrorAlert = ({
   message: string;
   onClose: () => void;
 }) => (
-  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-    {message}
-    <button onClick={onClose} className="float-right font-bold">
-      ×
+  <div className="flex items-center justify-between px-4 py-3 mb-6 bg-red-50 border border-red-100 text-red-700 text-sm">
+    <span>{message}</span>
+    <button
+      onClick={onClose}
+      className="ml-4 text-red-400 hover:text-red-600 transition-colors"
+    >
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
     </button>
   </div>
 );
 
 // Loading Spinner
-export const LoadingSpinner = ({ text = "Loading..." }: { text?: string }) => (
-  <div className="text-center py-8">
-    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-    <p className="mt-2 text-gray-600">{text}</p>
+export const LoadingSpinner = ({ text }: { text?: string }) => (
+  <div className="flex flex-col items-center justify-center py-16">
+    <div className="w-6 h-6 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
+    {text && <p className="mt-4 text-sm text-neutral-500">{text}</p>}
   </div>
+);
+
+// File Input
+export const FileInput = ({
+  onChange,
+  accept = "image/*",
+  className = "",
+}: {
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  accept?: string;
+  className?: string;
+}) => (
+  <label className={`block cursor-pointer ${className}`}>
+    <span className="flex items-center justify-center w-full px-4 py-3 border border-dashed border-neutral-300 text-neutral-500 text-sm hover:border-neutral-400 hover:text-neutral-600 transition-colors">
+      <svg
+        className="w-4 h-4 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+      </svg>
+      Choose file
+    </span>
+    <input type="file" accept={accept} onChange={onChange} className="hidden" />
+  </label>
 );

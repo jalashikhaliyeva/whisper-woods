@@ -41,40 +41,52 @@ export default function CollectionAdmin() {
     getCategoryName,
   } = useCollectionAdmin();
 
-  const TabButton = ({
-    tab,
-    label,
-  }: {
-    tab: "add" | "manage";
-    label: string;
-  }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`py-2 px-1 border-b-2 font-medium text-sm ${
-        activeTab === tab
-          ? "border-blue-500 text-blue-600"
-          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-      }`}
-    >
-      {label}
-    </button>
-  );
-
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Collection Management</h1>
+    <div className="max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
+          Collections
+        </h1>
+        <p className="text-neutral-500 text-sm mt-1">
+          Manage your villa galleries and categories
+        </p>
+      </div>
 
       {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
 
-      <div className="mb-8 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <TabButton tab="add" label="Add New Items" />
-          <TabButton tab="manage" label={`Manage Items (${items.length})`} />
-        </nav>
+      {/* Tabs */}
+      <div className="flex gap-6 mb-8 border-b border-neutral-200">
+        <button
+          onClick={() => setActiveTab("add")}
+          className={`pb-3 text-sm font-medium transition-colors relative ${
+            activeTab === "add"
+              ? "text-neutral-900"
+              : "text-neutral-400 hover:text-neutral-600"
+          }`}
+        >
+          Add New
+          {activeTab === "add" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-900" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("manage")}
+          className={`pb-3 text-sm font-medium transition-colors relative ${
+            activeTab === "manage"
+              ? "text-neutral-900"
+              : "text-neutral-400 hover:text-neutral-600"
+          }`}
+        >
+          Manage
+          <span className="ml-1.5 text-neutral-400">({items.length})</span>
+          {activeTab === "manage" && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-900" />
+          )}
+        </button>
       </div>
 
       {activeTab === "add" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AddCategoryForm
             value={newCategory}
             onChange={setNewCategory}
@@ -106,24 +118,26 @@ export default function CollectionAdmin() {
 
       {activeTab === "manage" && (
         <div className="space-y-6">
-          <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-4">
-            <label className="text-sm font-medium">Filter by Category:</label>
+          {/* Filter */}
+          <div className="flex items-center gap-4 p-4 bg-white border border-neutral-200">
+            <span className="text-sm text-neutral-600">Filter</span>
             <Select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               options={categoryOptions}
-              placeholder="All Categories"
+              placeholder="All categories"
+              className="min-w-[200px]"
             />
           </div>
 
           {loading ? (
-            <LoadingSpinner text="Loading items..." />
+            <LoadingSpinner />
           ) : items.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No items found for the selected category.
+            <div className="py-16 text-center text-neutral-400 text-sm">
+              No items found
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {items.map((item) => (
                 <ItemCard
                   key={item.id}

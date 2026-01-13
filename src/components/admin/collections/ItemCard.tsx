@@ -44,8 +44,8 @@ export const ItemCard = ({
   const isEditing = edit.item?.id === item.id;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="relative w-full h-48">
+    <div className="bg-white border border-neutral-200 overflow-hidden group">
+      <div className="relative w-full aspect-[4/3]">
         <Image
           src={item.imageSrc}
           alt={item.altText}
@@ -80,7 +80,6 @@ export const ItemCard = ({
   );
 };
 
-// Sub-components
 const ItemDisplay = ({
   item,
   categoryName,
@@ -94,28 +93,29 @@ const ItemDisplay = ({
   onEdit: () => void;
   onDelete: () => void;
 }) => (
-  <>
-    <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
-    <p className="text-gray-600 text-sm mb-2">{item.location}</p>
-    <p className="text-gray-500 text-xs mb-3">Category: {categoryName}</p>
-    <div className="flex gap-2">
+  <div>
+    <h3 className="font-medium text-neutral-900">{item.title}</h3>
+    <p className="text-sm text-neutral-500 mt-0.5">{item.location}</p>
+    <p className="text-xs text-neutral-400 mt-2">{categoryName}</p>
+    <div className="flex gap-2 mt-4 pt-4 border-t border-neutral-100">
       <AdminButton
         onClick={onEdit}
         disabled={loading}
-        className="flex-1 text-sm"
+        variant="secondary"
+        className="flex-1 text-sm py-2"
       >
         Edit
       </AdminButton>
       <AdminButton
         onClick={onDelete}
-        variant="red"
+        variant="danger"
         disabled={loading}
-        className="flex-1 text-sm"
+        className="flex-1 text-sm py-2"
       >
         Delete
       </AdminButton>
     </div>
-  </>
+  </div>
 );
 
 const EditForm = ({
@@ -139,10 +139,12 @@ const EditForm = ({
   onClearFile: () => void;
   onUpdateEdit: (field: keyof EditState, value: string) => void;
 }) => (
-  <form onSubmit={onSave} className="space-y-3">
+  <form onSubmit={onSave} className="space-y-4">
     <div>
-      <label className="block text-xs font-medium mb-1">Image</label>
-      <div className="relative w-full h-24 mb-2 rounded overflow-hidden border border-gray-200">
+      <label className="block text-xs text-neutral-600 uppercase tracking-wide mb-1.5">
+        Image
+      </label>
+      <div className="relative w-full aspect-video mb-2 overflow-hidden border border-neutral-200">
         <Image
           src={edit.preview || item.imageSrc}
           alt="Preview"
@@ -150,15 +152,15 @@ const EditForm = ({
           className="object-cover"
         />
         {edit.preview && (
-          <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
+          <span className="absolute top-2 right-2 px-2 py-0.5 bg-neutral-900 text-white text-xs">
             New
-          </div>
+          </span>
         )}
       </div>
       <div className="flex gap-2">
         <label className="flex-1 cursor-pointer">
-          <span className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded text-sm border border-gray-300 transition-colors">
-            {edit.file ? "Change Image" : "Select New Image"}
+          <span className="flex items-center justify-center w-full py-2 border border-neutral-200 text-neutral-600 text-sm hover:bg-neutral-50 transition-colors">
+            {edit.file ? "Change" : "Replace"}
           </span>
           <input
             type="file"
@@ -171,14 +173,16 @@ const EditForm = ({
           <button
             type="button"
             onClick={onClearFile}
-            className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition-colors"
+            className="px-3 py-2 border border-neutral-200 text-neutral-500 hover:bg-neutral-50 transition-colors text-sm"
           >
-            ✕
+            Clear
           </button>
         )}
       </div>
       {edit.file && (
-        <p className="text-xs text-gray-500 mt-1 truncate">{edit.file.name}</p>
+        <p className="text-xs text-neutral-400 mt-1.5 truncate">
+          {edit.file.name}
+        </p>
       )}
     </div>
     <FormField label="Title" small>
@@ -203,20 +207,19 @@ const EditForm = ({
         className="w-full text-sm"
       />
     </FormField>
-    <div className="flex gap-2">
+    <div className="flex gap-2 pt-2">
       <AdminButton
         type="submit"
-        variant="green"
         disabled={loading}
-        className="flex-1 text-sm"
+        className="flex-1 text-sm py-2"
       >
         {loading ? "Saving..." : "Save"}
       </AdminButton>
       <AdminButton
         onClick={onCancel}
-        variant="gray"
+        variant="secondary"
         disabled={loading}
-        className="flex-1 text-sm"
+        className="flex-1 text-sm py-2"
       >
         Cancel
       </AdminButton>

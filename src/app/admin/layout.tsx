@@ -16,11 +16,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     const adminToken = localStorage.getItem("adminToken");
-    if (adminToken === "admin-authenticated-2024") {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-    }
+    setIsAuthenticated(adminToken === "admin-authenticated-2024");
     setIsLoading(false);
   }, []);
 
@@ -44,8 +40,8 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="w-5 h-5 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
       </div>
     );
   }
@@ -55,10 +51,10 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-100">
       <div className="flex">
         <AdminSidebar onLogout={handleLogout} />
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-8 overflow-auto">{children}</main>
       </div>
     </div>
   );
