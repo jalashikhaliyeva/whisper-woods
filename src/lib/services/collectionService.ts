@@ -10,19 +10,26 @@ export class CollectionService {
   // Category methods
   static async loadCategories(): Promise<CollectionCategory[]> {
     try {
-      const categories = await FirebaseStorageService.loadFiles<CollectionCategory>(
-        this.CATEGORIES_DB_PATH
-      );
+      const categories =
+        await FirebaseStorageService.loadFiles<CollectionCategory>(
+          this.CATEGORIES_DB_PATH
+        );
       return categories
-        .filter(cat => cat.isActive)
+        .filter((cat) => cat.isActive)
         .sort((a, b) => a.order - b.order);
     } catch (error) {
       console.error("Error loading categories:", error);
-      throw new Error("Failed to load categories. Please check your Firebase configuration.");
+      throw new Error(
+        "Failed to load categories. Please check your Firebase configuration."
+      );
     }
   }
 
-  static async createCategory(name: string, slug: string, order: number): Promise<CollectionCategory> {
+  static async createCategory(
+    name: string,
+    slug: string,
+    order: number
+  ): Promise<CollectionCategory> {
     try {
       const newCategory: CollectionCategory = {
         id: FirebaseStorageService.generateId(),
@@ -31,54 +38,84 @@ export class CollectionService {
         order,
         isActive: true,
         createdAt: new Date().toISOString(),
-        url: '', // No file for category, so empty string
-        fileName: '',
+        url: "", // No file for category, so empty string
+        fileName: "",
         fileSize: 0,
-        fileType: '',
+        fileType: "",
       };
 
-      await FirebaseStorageService.saveFileMetadata(this.CATEGORIES_DB_PATH, newCategory);
+      await FirebaseStorageService.saveFileMetadata(
+        this.CATEGORIES_DB_PATH,
+        newCategory
+      );
       return newCategory;
     } catch (error) {
       console.error("Error creating category:", error);
-      throw new Error(`Error creating category: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error creating category: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
-  static async updateCategory(categoryId: string, updates: Partial<CollectionCategory>): Promise<void> {
+  static async updateCategory(
+    categoryId: string,
+    updates: Partial<CollectionCategory>
+  ): Promise<void> {
     try {
-      await FirebaseStorageService.updateFileMetadata(this.CATEGORIES_DB_PATH, categoryId, updates);
+      await FirebaseStorageService.updateFileMetadata(
+        this.CATEGORIES_DB_PATH,
+        categoryId,
+        updates
+      );
     } catch (error) {
       console.error("Error updating category:", error);
-      throw new Error(`Error updating category: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error updating category: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
   static async deleteCategory(categoryId: string): Promise<void> {
     try {
-      await FirebaseStorageService.updateFileMetadata(this.CATEGORIES_DB_PATH, categoryId, { isActive: false });
+      await FirebaseStorageService.updateFileMetadata(
+        this.CATEGORIES_DB_PATH,
+        categoryId,
+        { isActive: false }
+      );
     } catch (error) {
       console.error("Error deleting category:", error);
-      throw new Error(`Error deleting category: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error deleting category: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
   // Collection Items methods
-  static async loadCollectionItems(category?: string): Promise<CollectionItem[]> {
+  static async loadCollectionItems(
+    category?: string
+  ): Promise<CollectionItem[]> {
     try {
       const items = await FirebaseStorageService.loadFiles<CollectionItem>(
         this.ITEMS_DB_PATH
       );
-      
+
       let filteredItems = items;
-      if (category && category !== 'all') {
-        filteredItems = items.filter(item => item.category === category);
+      if (category && category !== "all") {
+        filteredItems = items.filter((item) => item.category === category);
       }
-      
+
       return filteredItems.sort((a, b) => a.order - b.order);
     } catch (error) {
       console.error("Error loading collection items:", error);
-      throw new Error("Failed to load collection items. Please check your Firebase configuration.");
+      throw new Error(
+        "Failed to load collection items. Please check your Firebase configuration."
+      );
     }
   }
 
@@ -113,20 +150,27 @@ export class CollectionService {
         order: currentCount + 1,
         createdAt: new Date().toISOString(),
         url: downloadURL,
-        fileName: fileName || '',
+        fileName: fileName || "",
         fileSize: file.size || 0,
-        fileType: file.type || '',
+        fileType: file.type || "",
       };
 
       console.log("Saving to database...", newItem);
 
-      await FirebaseStorageService.saveFileMetadata(this.ITEMS_DB_PATH, newItem);
+      await FirebaseStorageService.saveFileMetadata(
+        this.ITEMS_DB_PATH,
+        newItem
+      );
 
       console.log("Database save successful");
       return newItem;
     } catch (error) {
       console.error("Error uploading collection item:", error);
-      throw new Error(`Error uploading collection item: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error uploading collection item: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
@@ -139,7 +183,11 @@ export class CollectionService {
       );
     } catch (error) {
       console.error("Error deleting collection item:", error);
-      throw new Error(`Error deleting collection item: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error deleting collection item: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
@@ -148,10 +196,73 @@ export class CollectionService {
     updates: Partial<CollectionItem>
   ): Promise<void> {
     try {
-      await FirebaseStorageService.updateFileMetadata(this.ITEMS_DB_PATH, itemId, updates);
+      await FirebaseStorageService.updateFileMetadata(
+        this.ITEMS_DB_PATH,
+        itemId,
+        updates
+      );
     } catch (error) {
       console.error("Error updating collection item:", error);
-      throw new Error(`Error updating collection item: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Error updating collection item: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
+  static async updateCollectionItemWithImage(
+    item: CollectionItem,
+    updates: Partial<CollectionItem>,
+    newFile: File | null
+  ): Promise<void> {
+    try {
+      // If there's a new file, upload it and update image-related fields
+      if (newFile) {
+        console.log("Uploading new image for item:", item.id);
+
+        // Upload the new image
+        const { downloadURL, fileName } =
+          await FirebaseStorageService.uploadFile(
+            newFile,
+            this.ITEMS_STORAGE_PATH
+          );
+
+        // Try to delete the old image (don't fail if it doesn't work)
+        try {
+          await FirebaseStorageService.deleteStorageFile(item.imageSrc);
+        } catch (deleteError) {
+          console.warn(
+            "Could not delete old image, continuing anyway:",
+            deleteError
+          );
+        }
+
+        // Add image fields to updates
+        updates = {
+          ...updates,
+          imageSrc: downloadURL,
+          url: downloadURL,
+          fileName: fileName || "",
+          fileSize: newFile.size || 0,
+          fileType: newFile.type || "",
+        };
+      }
+
+      // Update the item in the database
+      await FirebaseStorageService.updateFileMetadata(
+        this.ITEMS_DB_PATH,
+        item.id,
+        updates
+      );
+      console.log("Item updated successfully");
+    } catch (error) {
+      console.error("Error updating collection item with image:", error);
+      throw new Error(
+        `Error updating collection item: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
